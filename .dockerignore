@@ -1,70 +1,84 @@
-.git
-.worktrees
+# Dependencies
+node_modules/
 
-# Sensitive files – scripts/docker/setup.sh writes .env with OPENCLAW_GATEWAY_TOKEN
-# into the project root; keep it out of the build context.
-.env
-.env.*
+# Build output
+dist/
+build/
 
-.bun-cache
-.bun
-.tmp
-**/.tmp
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
-**/.DS_Store
-*.png
-*.jpg
-*.jpeg
-*.webp
-*.gif
-*.mp4
-*.mov
-*.wav
-*.mp3
-node_modules
-**/node_modules
-.pnpm-store
-**/.pnpm-store
-.turbo
-**/.turbo
-.cache
-**/.cache
-.next
-**/.next
-coverage
-**/coverage
+Thumbs.db
+
+# Logs
+logs/
 *.log
-tmp
-**/tmp
+npm-debug.log*
 
-# build artifacts
-dist
-**/dist
-apps/macos/.build
-apps/ios/build
-**/*.trace
+# Environment files
+.env
+.env.local
+.env.*.local
 
-# large app trees not needed for CLI build
-apps/
-assets/
-Peekaboo/
-Swabble/
-Core/
-Users/
-vendor/
+# Test files
+tests/
+coverage/
+.nyc_output/
 
-# Needed for building the Canvas A2UI bundle during Docker image builds.
-# Keep the rest of apps/ and vendor/ excluded to avoid a large build context.
-!apps/shared/
-!apps/shared/OpenClawKit/
-!apps/shared/OpenClawKit/Sources/
-!apps/shared/OpenClawKit/Sources/OpenClawKit/
-!apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/
-!apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/tool-display.json
-!apps/shared/OpenClawKit/Tools/
-!apps/shared/OpenClawKit/Tools/CanvasA2UI/
-!apps/shared/OpenClawKit/Tools/CanvasA2UI/**
-!vendor/a2ui/
-!vendor/a2ui/renderers/
-!vendor/a2ui/renderers/lit/
-!vendor/a2ui/renderers/lit/**
+# Documentation (optional - include if needed)
+docs/
+
+# Git
+.git/
+.gitignore
+
+# OpenClaw workspace (exclude from image, mount as volume instead)
+~/.openclaw/workspace/
+~/.openclaw/sessions/
+
+# Development files
+*.test.ts
+*.spec.ts
+jest.config.js
+tsconfig.json
+
+# Scripts (optional - include if needed for runtime)
+scripts/*.sh
+
+# Docker files themselves (already in context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Additional exclusions for smaller image
+**/.gitkeep
+**/README.md
+**/CHANGELOG.md
+**/CONTRIBUTING.md
+**/CODE_OF_CONDUCT.md
+**/SECURITY.md
+
+# Build artifacts
+*.tsbuildinfo
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# TypeScript declaration maps (optional)
+*.d.ts.map
+
+# Pnpm specific
+.pnpm-store/

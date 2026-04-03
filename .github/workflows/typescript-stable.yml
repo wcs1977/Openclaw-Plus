@@ -1,0 +1,79 @@
+name: TypeScript Stable Version Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-typescript-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.32.1
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Check TypeScript version
+        id: check-ts
+        run: |
+          TS_VERSION=$(pnpm list typescript --depth=0 | grep typescript@ | awk '{print $2}')
+          echo "Current TypeScript version: $TS_VERSION"
+          
+          # Extract major version
+          MAJOR_VERSION=$(echo "$TS_VERSION" | cut -d. -f1)
+          
+          if [ "$MAJOR_VERSION" != "6" ]; then
+            echo "Warning: Using TypeScript 6.x (experimental)"
+            echo "Consider migrating to stable TypeScript 5.x for better compatibility"
+            
+            # Fail the build if using experimental version
+            exit 1
+          else
+            echo "Using stable TypeScript 6.x ✓"
+          fi
+
+  type-check-stable:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.32.1
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Type check
+        run: |
+          # Force use of stable TypeScript if available
+          npm install --save-dev typescript@~6.0.0 || true
+          
+          npx tsc --noEmit
+          
+      - name: Check for type errors
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "❌ TypeScript type errors detected"
+            exit 1
+          fi

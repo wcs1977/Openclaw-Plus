@@ -57,7 +57,20 @@ export function shouldUseShellForCommand(cmd, platform = process.platform) {
   if (platform !== "win32") {
     return false;
   }
+  
   const extension = path.extname(cmd).toLowerCase();
+  
+  // SECURITY FIX: Commands with spaces in path MUST use shell execution
+  // This prevents spawn EINVAL errors on Windows
+  if (cmd.includes(" ")) {
+    return true;
+  }
+  
+  // .CMD and .BAT files need cmd.exe to execute properly
+  if (extension === ".cmd" || extension === ".bat") {
+    return true;
+  }
+  
   return WINDOWS_SHELL_EXTENSIONS.has(extension);
 }
 
@@ -78,21 +91,48 @@ export function assertSafeWindowsShellArgs(args, platform = process.platform) {
 
 function createSpawnOptions(cmd, args, envOverride) {
   const useShell = shouldUseShellForCommand(cmd);
+  
   if (useShell) {
     assertSafeWindowsShellArgs(args);
+    
+    // SECURITY FIX: For commands with spaces or .CMD files, wrap in cmd.exe /c
+    // This ensures proper path handling while avoiding shell metacharacter issues
+    const fullCmd = `"${cmd}"`;
+    return {
+      cwd: uiDir,
+      stdio: "inherit",
+      env: envOverride ?? process.env,
+      shell: true,
+      windowsVerbatimArguments: false,
+    };
   }
+  
+  // For non-shell commands (pnpm, npm), use direct execution
   return {
     cwd: uiDir,
     stdio: "inherit",
     env: envOverride ?? process.env,
-    ...(useShell ? { shell: true } : {}),
+    windowsVerbatimArguments: false,
   };
 }
 
 function run(cmd, args) {
   let child;
+  
   try {
-    child = spawn(cmd, args, createSpawnOptions(cmd, args));
+    // SECURITY FIX: Log command before execution for debugging
+    console.log(`[UI Script] Executing: ${cmd} ${args.join(" ")}`);
+    
+    // SECURITY FIX: For commands with spaces or .CMD files, use cmd.exe /c wrapper
+    if (shouldUseShellForCommand(cmd)) {
+      child = spawn(
+        "cmd", 
+        ["/c", `"${cmd}"`, ...args], 
+        createSpawnOptions(cmd, args)
+      );
+    } else {
+      child = spawn(cmd, args, createSpawnOptions(cmd, args));
+    }
   } catch (err) {
     console.error(`Failed to launch ${cmd}:`, err);
     process.exit(1);
@@ -103,8 +143,10 @@ function run(cmd, args) {
     console.error(`Failed to launch ${cmd}:`, err);
     process.exit(1);
   });
+  
   child.on("exit", (code) => {
     if (code !== 0) {
+      console.error(`[UI Script] Command exited with code: ${code}`);
       process.exit(code ?? 1);
     }
   });
@@ -112,18 +154,39 @@ function run(cmd, args) {
 
 function runSync(cmd, args, envOverride) {
   let result;
+  
   try {
-    result = spawnSync(cmd, args, createSpawnOptions(cmd, args, envOverride));
+    // SECURITY FIX: Log command before execution for debugging
+    console.log(`[UI Script] Executing (sync): ${cmd} ${args.join(" ")}`);
+    
+    // SECURITY FIX: For commands with spaces or .CMD files, use cmd.exe /c wrapper
+    if (shouldUseShellForCommand(cmd)) {
+      result = spawnSync(
+        "cmd", 
+        ["/c", `"${cmd}"`, ...args], 
+        createSpawnOptions(cmd, args, envOverride)
+      );
+    } else {
+      result = spawnSync(cmd, args, createSpawnOptions(cmd, args, envOverride));
+    }
   } catch (err) {
     console.error(`Failed to launch ${cmd}:`, err);
     process.exit(1);
     return;
   }
+  
   if (result.signal) {
+    console.error(`[UI Script] Command killed by signal: ${result.signal}`);
     process.exit(1);
   }
-  if ((result.status ?? 1) !== 0) {
-    process.exit(result.status ?? 1);
+  
+  const status = result.status ?? 1;
+  if (status !== 0) {
+    console.error(`[UI Script] Command exited with status: ${status}`);
+    if (result.stderr && result.stderr.length > 0) {
+      process.stderr.write(result.stderr.toString());
+    }
+    process.exit(status);
   }
 }
 

@@ -1,4 +1,4 @@
-# 🦞 OpenClaw — Personal AI Assistant
+# 🦞 OpenClaw Plus — 个人 AI 助手增强版
 
 <p align="center">
     <picture>
@@ -18,17 +18,20 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
 </p>
 
-**OpenClaw** is a _personal AI assistant_ you run on your own devices.
-It answers you on the channels you already use (WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, iMessage, BlueBubbles, IRC, Microsoft Teams, Matrix, Feishu, LINE, Mattermost, Nextcloud Talk, Nostr, Synology Chat, Tlon, Twitch, Zalo, Zalo Personal, WeChat, WebChat). It can speak and listen on macOS/iOS/Android, and can render a live Canvas you control. The Gateway is just the control plane — the product is the assistant.
+**OpenClaw Plus** 是一款 _个人 AI 助手增强版_，您可以在自己的设备上运行。
+它支持您已使用的各种消息渠道（WhatsApp、Telegram、Slack、Discord、Google Chat、Signal、iMessage、BlueBubbles、IRC、Microsoft Teams、Matrix、飞书、LINE、Mattermost、Nextcloud Talk、Nostr、Synology Chat、Tlon、Twitch、Zalo、Zalo Personal、微信、WebChat）。它可以在 macOS/iOS/Android 上说话和收听，并可以渲染您控制的实时 Canvas。网关只是控制平面——产品是助手本身。
 
-If you want a personal, single-user assistant that feels local, fast, and always-on, this is it.
+如果您想要一个感觉本地化、快速且始终在线的个人单用户助手，这就是您的选择。
 
-[Website](https://openclaw.ai) · [Docs](https://docs.openclaw.ai) · [Vision](VISION.md) · [DeepWiki](https://deepwiki.com/openclaw/openclaw) · [Getting Started](https://docs.openclaw.ai/start/getting-started) · [Updating](https://docs.openclaw.ai/install/updating) · [Showcase](https://docs.openclaw.ai/start/showcase) · [FAQ](https://docs.openclaw.ai/help/faq) · [Onboarding](https://docs.openclaw.ai/start/wizard) · [Nix](https://github.com/openclaw/nix-openclaw) · [Docker](https://docs.openclaw.ai/install/docker) · [Discord](https://discord.gg/clawd)
+[官网](https://openclaw.ai) · [文档](https://docs.openclaw.ai) · [愿景](VISION.md) · [DeepWiki](https://deepwiki.com/openclaw/openclaw) · [开始使用](https://docs.openclaw.ai/start/getting-started) · [更新指南](https://docs.openclaw.ai/install/updating) · [展示](https://docs.openclaw.ai/start/showcase) · [FAQ](https://docs.openclaw.ai/help/faq) · [向导](https://docs.openclaw.ai/start/wizard) · [Nix](https://github.com/openclaw/nix-openclaw) · [Docker](https://docs.openclaw.ai/install/docker) · [Discord](https://discord.gg/clawd)
 
-Preferred setup: run `openclaw onboard` in your terminal.
-OpenClaw Onboard guides you step by step through setting up the gateway, workspace, channels, and skills. It is the recommended CLI setup path and works on **macOS, Linux, and Windows (via WSL2; strongly recommended)**.
-Works with npm, pnpm, or bun.
-New install? Start here: [Getting started](https://docs.openclaw.ai/start/getting-started)
+推荐设置：在终端中运行 `openclaw-plus onboard`。
+OpenClaw Plus Onboard 将逐步引导您完成网关、工作空间、渠道和技能的设置。这是推荐的 CLI 设置路径，适用于 **macOS、Linux 和 Windows（通过 WSL2；强烈推荐）**。
+支持 npm、pnpm 或 bun。
+
+新安装？从这里开始：[开始使用](https://docs.openclaw.ai/start/getting-started)
+
+**中文版**: [安装指南](../docs/INSTALLATION_GUIDE_CN.md)
 
 ## Sponsors
 
@@ -90,36 +93,36 @@ Model note: while many providers/models are supported, for the best experience a
 
 ## Install (recommended)
 
-Runtime: **Node 24 (recommended) or Node 22.16+**.
+Runtime: **Node 24（推荐）或 Node 22.16+**。
 
 ```bash
-npm install -g openclaw@latest
-# or: pnpm add -g openclaw@latest
+npm install -g openclaw-plus@latest
+# or: pnpm add -g openclaw-plus@latest
 
-openclaw onboard --install-daemon
+openclaw-plus onboard --install-daemon
 ```
 
-OpenClaw Onboard installs the Gateway daemon (launchd/systemd user service) so it stays running.
+OpenClaw Plus Onboard 安装 Gateway 守护进程（launchd/systemd user service），使其保持运行。
 
 ## Quick start (TL;DR)
 
-Runtime: **Node 24 (recommended) or Node 22.16+**.
+Runtime: **Node 24（推荐）或 Node 22.16+**。
 
-Full beginner guide (auth, pairing, channels): [Getting started](https://docs.openclaw.ai/start/getting-started)
+完整新手指南（认证、配对、渠道）：[开始使用](https://docs.openclaw.ai/start/getting-started)
 
 ```bash
-openclaw onboard --install-daemon
+openclaw-plus onboard --install-daemon
 
-openclaw gateway --port 18789 --verbose
+openclaw-plus gateway --port 18789 --verbose
 
-# Send a message
-openclaw message send --to +1234567890 --message "Hello from OpenClaw"
+# 发送消息
+openclaw-plus message send --to +1234567890 --message "Hello from OpenClaw Plus"
 
-# Talk to the assistant (optionally deliver back to any connected channel: WhatsApp/Telegram/Slack/Discord/Google Chat/Signal/iMessage/BlueBubbles/IRC/Microsoft Teams/Matrix/Feishu/LINE/Mattermost/Nextcloud Talk/Nostr/Synology Chat/Tlon/Twitch/Zalo/Zalo Personal/WeChat/WebChat)
-openclaw agent --message "Ship checklist" --thinking high
+# 与助手对话（可选将回复发送到任何连接的消息渠道：WhatsApp/Telegram/Slack/Discord/Google Chat/Signal/iMessage/BlueBubbles/IRC/Microsoft Teams/Matrix/Feishu/LINE/Mattermost/Nextcloud Talk/Nostr/Synology Chat/Tlon/Twitch/Zalo/Zalo Personal/微信/WebChat）
+openclaw-plus agent --message "Ship checklist" --thinking high
 ```
 
-Upgrading? [Updating guide](https://docs.openclaw.ai/install/updating) (and run `openclaw doctor`).
+需要更新？[更新指南](https://docs.openclaw.ai/install/updating)（并运行 `openclaw-plus doctor`）。
 
 ## Development channels
 
@@ -132,23 +135,23 @@ Details: [Development channels](https://docs.openclaw.ai/install/development-cha
 
 ## From source (development)
 
-Prefer `pnpm` for builds from source. Bun is optional for running TypeScript directly.
+优先使用 `pnpm` 从源码构建。Bun 可选用于直接运行 TypeScript。
 
 ```bash
 git clone https://github.com/openclaw/openclaw.git
 cd openclaw
 
 pnpm install
-pnpm ui:build # auto-installs UI deps on first run
+pnpm ui:build # 首次运行时自动安装 UI 依赖
 pnpm build
 
-pnpm openclaw onboard --install-daemon
+openclaw-plus onboard --install-daemon
 
-# Dev loop (auto-reload on source/config changes)
+# 开发循环（源/配置更改时自动重载）
 pnpm gateway:watch
 ```
 
-Note: `pnpm openclaw ...` runs TypeScript directly (via `tsx`). `pnpm build` produces `dist/` for running via Node / the packaged `openclaw` binary.
+注意：`pnpm openclaw-plus ...` 直接运行 TypeScript（通过 `tsx`）。`pnpm build` 生成 `dist/` 用于通过 Node /打包的 `openclaw-plus` 二进制文件运行。
 
 ## Security defaults (DM access)
 
