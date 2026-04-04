@@ -97,24 +97,62 @@ if (Test-Path $HASH_FILE) {
 }
 
 # Compile TypeScript renderer
-Write-Host "Compiling A2UI renderer..."
-pnpm -s exec tsc -p "$A2UI_RENDERER_DIR\tsconfig.json"
+Write-Host "Compiling A2UI renderer..." -ForegroundColor Cyan
+$tscConfig = "$A2UI_RENDERER_DIR\tsconfig.json"
+if (-not (Test-Path $tscConfig)) {
+    Write-Host "ERROR: TypeScript config not found at: $tscConfig" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "TypeScript config path: $tscConfig" -ForegroundColor Yellow
+$tscOutput = pnpm -s exec tsc -p "$tscConfig" 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "TypeScript compilation failed:" -ForegroundColor Red
+    Write-Host $tscOutput -ForegroundColor Yellow
+    throw "TypeScript build failed"
+}
 
 # Run rolldown (try multiple locations)
 $rolldownConfig = Join-Path $A2UI_APP_DIR "rolldown.config.mjs"
 
-if (Get-Command rolldown -ErrorAction SilentlyContinue) {
-    Write-Host "Using system rolldown..."
-    rolldown -c $rolldownConfig
-} elseif (Test-Path "$ROOT_DIR\node_modules\.pnpm\node_modules\rolldown\bin\cli.mjs") {
-    Write-Host "Using local rolldown from node_modules/.pnpm/node_modules/rolldown..."
-    node "$ROOT_DIR\node_modules\.pnpm\node_modules\rolldown\bin\cli.mjs" -c $rolldownConfig
-} elseif (Test-Path "$ROOT_DIR\node_modules\.pnpm\rolldown@1.0.0-rc.9\node_modules\rolldown\bin\cli.mjs") {
-    Write-Host "Using local rolldown from node_modules/.pnpm/rolldown@1.0.0-rc.9..."
-    node "$ROOT_DIR\node_modules\.pnpm\rolldown@1.0.0-rc.9\node_modules\rolldown\bin\cli.mjs" -c $rolldownConfig
-} else {
-    Write-Host "Using pnpm dlx for rolldown..."
-    pnpm -s dlx rolldown -c $rolldownConfig
+Write-Host "Rolldown config path: $rolldownConfig" -ForegroundColor Yellow
+if (-not (Test-Path $rolldownConfig)) {
+    Write-Host "ERROR: Rolldown config not found at: $rolldownConfig" -ForegroundColor Red
+    exit 1
+}
+
+$rolldownOutput = ""
+try {
+    if (Get-Command rolldown -ErrorAction SilentlyContinue) {
+        Write-Host "Using system rolldown..." -ForegroundColor Yellow
+        $rolldownOutput = & rolldown -c $rolldownConfig 2>&1
+    } elseif (Test-Path "$ROOT_DIR\node_modules\.pnpm\node_modules\rolldown\bin\cli.mjs") {
+        Write-Host "Using local rolldown from node_modules/.pnpm/node_modules/rolldown..." -ForegroundColor Yellow
+        $rolldownOutput = node "$ROOT_DIR\node_modules\.pnpm\node_modules\rolldown\bin\cli.mjs" -c $rolldownConfig 2>&1
+    } elseif (Test-Path "$ROOT_DIR\node_modules\.pnpm\rolldown@1.0.0-rc.9\node_modules\rolldown\bin\cli.mjs") {
+        Write-Host "Using local rolldown from node_modules/.pnpm/rolldown@1.0.0-rc.9..." -ForegroundColor Yellow
+        $rolldownOutput = node "$ROOT_DIR\node_modules\.pnpm\rolldown@1.0.0-rc.9\node_modules\rolldown\bin\cli.mjs" -c $rolldownConfig 2>&1
+    } elseif (Test-Path "$ROOT_DIR\node_modules\.pnpm\rolldown@1.0.0-rc.12\node_modules\rolldown\bin\cli.mjs") {
+        Write-Host "Using local rolldown from node_modules/.pnpm/rolldown@1.0.0-rc.12..." -ForegroundColor Yellow
+        $rolldownOutput = node "$ROOT_DIR\node_modules\.pnpm\rolldown@1.0.0-rc.12\node_modules\rolldown\bin\cli.mjs" -c $rolldownConfig 2>&1
+    } else {
+        Write-Host "Using pnpm dlx for rolldown..." -ForegroundColor Yellow
+        $rolldownOutput = pnpm -s dlx rolldown -c $rolldownConfig 2>&1
+    }
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Rolldown failed with exit code: $LASTEXITCODE" -ForegroundColor Red
+        Write-Host "Output:" -ForegroundColor Yellow
+        Write-Host $rolldownOutput -ForegroundColor Yellow
+        throw "Rolldown build failed"
+    }
+} catch {
+    Write-Host "Rolldown exception: $_" -ForegroundColor Red
+    if ($rolldownOutput) {
+        Write-Host "Output:" -ForegroundColor Yellow
+        Write-Host $rolldownOutput -ForegroundColor Yellow
+    }
+    throw
 }
 
 # Save hash
