@@ -1,7 +1,7 @@
 # OpenClaw Docker Image - Production Build
 # 基于 Node.js 22 LTS，优化构建和运行时性能
 
-FROM node:22-alpine AS builder
+FROM node:26-alpine AS builder
 
 # 设置工作目录
 WORKDIR /app
@@ -27,7 +27,7 @@ COPY . .
 RUN pnpm run build
 
 # 生产阶段 - 最小化镜像
-FROM node:22-alpine AS production
+FROM node:26-alpine AS production
 
 # 设置非 root 用户
 RUN addgroup -g 1001 -S openclaw && \
